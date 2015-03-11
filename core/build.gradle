@@ -3,10 +3,9 @@ apply plugin: 'com.android.library'
 android {
     defaultPublishConfig "debug"
     compileSdkVersion 21
-    buildToolsVersion '21.1.1'
+    buildToolsVersion '21.1.2'
 
     defaultConfig {
-        applicationId "com.du.android.recyclerview"
         minSdkVersion 15
         targetSdkVersion 21
         versionCode 1
@@ -14,7 +13,7 @@ android {
     }
     buildTypes {
         release {
-            runProguard false
+            minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
