@@ -27,12 +27,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.du.android.recyclerview.DragDropTouchListener;
-import com.du.android.recyclerview.RecyclerViewAdapter;
+import com.du.android.recyclerview.RecycleDragDropManager;
+import com.du.android.recyclerview.RecyclerArrayAdapter;
 import com.du.android.recyclerview.SwipeToDismissTouchListener;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 
@@ -41,7 +40,7 @@ public class DemoActivity extends Activity implements ActionMode.Callback {
 
     private ActionMode actionMode;
     private RecyclerViewAdapterImpl adapter;
-    private DragDropTouchListener dragDropTouchListener;
+    private RecycleDragDropManager dragDropManager;
 
     private SwipeToDismissTouchListener swipeToDismissTouchListener;
 
@@ -67,26 +66,11 @@ public class DemoActivity extends Activity implements ActionMode.Callback {
     }
 
 
-    public class RecyclerViewAdapterImpl extends RecyclerViewAdapter<DemoModel, DemoViewHolder> {
+    public class RecyclerViewAdapterImpl extends RecyclerArrayAdapter<DemoModel, DemoViewHolder> {
 
-        List<DemoModel> items = new ArrayList<DemoModel>();
-
-
-        @Override
-        public void swapPositions(int from, int to) {
-            Collections.swap(items, from, to);
+        public RecyclerViewAdapterImpl(ArrayList<DemoModel> items) {
+            super(items);
         }
-
-        RecyclerViewAdapterImpl() {
-            setHasStableIds(true);
-            for (int i = 0; i < 20; i++) {
-                DemoModel demoModel = new DemoModel("Test " + i);
-                demoModel.id = i;
-                items.add(demoModel);
-            }
-
-        }
-
 
         @Override
         public DemoViewHolder onCreateViewHolder(ViewGroup viewGroup, final int position) {
@@ -97,29 +81,8 @@ public class DemoActivity extends Activity implements ActionMode.Callback {
 
         @Override
         public void onBindViewHolder(DemoViewHolder viewHolder, final int position) {
-            super.onBindViewHolder(viewHolder, position);
-            DemoModel model = items.get(position);
+            DemoModel model = getItem(position);
             viewHolder.text.setText(model.text);
-        }
-
-        @Override
-        public int getItemCount() {
-            return items.size();
-        }
-
-
-        @Override
-        public long getItemId(int position) {
-            if (position < 0 || position >= items.size()) {
-                return -1;
-            }
-            return items.get(position).id;
-
-        }
-
-
-        public void removeItem(int pos) {
-            items.remove(pos);
         }
     }
 
@@ -135,7 +98,12 @@ public class DemoActivity extends Activity implements ActionMode.Callback {
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setHasFixedSize(true);
 
-        this.adapter = new RecyclerViewAdapterImpl();
+        ArrayList<DemoModel> models = new ArrayList<>();
+        for (int i = 0; i < 20; i++) {
+            models.add(new DemoModel("model : " + i));
+        }
+
+        this.adapter = new RecyclerViewAdapterImpl(models);
         recyclerView.setAdapter(adapter);
 
 
@@ -159,21 +127,8 @@ public class DemoActivity extends Activity implements ActionMode.Callback {
         recyclerView.addOnItemTouchListener(swipeToDismissTouchListener);
 
 
-        dragDropTouchListener = new DragDropTouchListener(recyclerView) {
-            @Override
-            protected void onItemSwitch(RecyclerView recyclerView, int from, int to) {
-                adapter.swapPositions(from, to);
-                adapter.clearSelection(from);
-                adapter.notifyItemChanged(to);
-                if (actionMode != null) actionMode.finish();
-            }
-
-            @Override
-            protected void onItemDrop(RecyclerView recyclerView, int position) {
-            }
-        };
-
-        recyclerView.addOnItemTouchListener(dragDropTouchListener);
+        dragDropManager = new RecycleDragDropManager(recyclerView, adapter);
+        recyclerView.addOnItemTouchListener(dragDropManager);
     }
 
     @Override
@@ -214,7 +169,6 @@ public class DemoActivity extends Activity implements ActionMode.Callback {
     @Override
     public void onDestroyActionMode(ActionMode actionMode) {
         swipeToDismissTouchListener.setEnabled(true);
-        adapter.clearSelections();
         this.actionMode = null;
 
     }
