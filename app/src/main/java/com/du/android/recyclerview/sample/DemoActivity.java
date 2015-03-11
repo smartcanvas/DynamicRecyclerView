@@ -107,27 +107,27 @@ public class DemoActivity extends Activity implements ActionMode.Callback {
         recyclerView.setAdapter(adapter);
 
 
-        swipeToDismissTouchListener = new SwipeToDismissTouchListener(recyclerView, new SwipeToDismissTouchListener.DismissCallbacks() {
+//        swipeToDismissTouchListener = new SwipeToDismissTouchListener(recyclerView, new SwipeToDismissTouchListener.DismissCallbacks() {
+//
+//            @Override
+//            public SwipeToDismissTouchListener.SwipeDirection canDismiss(int position) {
+//                return SwipeToDismissTouchListener.SwipeDirection.RIGHT;
+//            }
+//
+//            @Override
+//            public void onDismiss(RecyclerView view, List<SwipeToDismissTouchListener.PendingDismissData> dismissData) {
+//                for (SwipeToDismissTouchListener.PendingDismissData data : dismissData) {
+//                    adapter.removeItem(data.position);
+//                    adapter.notifyItemRemoved(data.position);
+//                }
+//            }
+//        });
+//
+//
+//        recyclerView.addOnItemTouchListener(swipeToDismissTouchListener);
 
-            @Override
-            public SwipeToDismissTouchListener.SwipeDirection canDismiss(int position) {
-                return SwipeToDismissTouchListener.SwipeDirection.RIGHT;
-            }
 
-            @Override
-            public void onDismiss(RecyclerView view, List<SwipeToDismissTouchListener.PendingDismissData> dismissData) {
-                for (SwipeToDismissTouchListener.PendingDismissData data : dismissData) {
-                    adapter.removeItem(data.position);
-                    adapter.notifyItemRemoved(data.position);
-                }
-            }
-        });
-
-
-        recyclerView.addOnItemTouchListener(swipeToDismissTouchListener);
-
-
-        dragDropManager = new RecycleDragDropManager(recyclerView, adapter);
+        dragDropManager = new RecycleDragDropManager(recyclerView, adapter, RecycleDragDropManager.ORIENTATION_VERTICAL);
         recyclerView.addOnItemTouchListener(dragDropManager);
     }
 
