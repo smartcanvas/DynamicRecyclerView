@@ -68,7 +68,7 @@ public abstract class DragDropTouchListener implements RecyclerView.OnItemTouchL
     private int downY = -1;
     private int downX = -1;
     private View mobileView;
-    private int mobileViewStartY = -1;
+    private float mobileViewStartY = -1;
     private int mobileViewCurrentPos = -1;
     private int activePointerId;
     private boolean dragging;
@@ -88,6 +88,8 @@ public abstract class DragDropTouchListener implements RecyclerView.OnItemTouchL
      * Gesture detector used to process event.
      */
     private GestureDetector mGestureDetector;
+
+    private float mInitialeY;
 
 
     public DragDropTouchListener(RecyclerView recyclerView) {
@@ -165,7 +167,7 @@ public abstract class DragDropTouchListener implements RecyclerView.OnItemTouchL
         mobileView = getDraggingView(viewUnder);
         mobileView.setX(viewUnder.getX());
         mobileView.setY(viewUnder.getY());
-        mobileViewStartY = downY;
+        mobileViewStartY = mobileView.getY();
 
         ViewGroup.LayoutParams lp = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         ((ViewGroup) recyclerView.getParent()).addView(mobileView, lp);
@@ -189,9 +191,9 @@ public abstract class DragDropTouchListener implements RecyclerView.OnItemTouchL
 
         int pointerIndex = event.findPointerIndex(activePointerId);
         int currentY = (int) event.getY(pointerIndex);
-        int deltaY = currentY - downY;
-        int mobileViewY = mobileViewStartY + deltaY;
-        mobileView.setY(mobileViewY);
+        float deltaY = currentY - downY;
+        float mobileViewY = mobileViewStartY + deltaY;
+        mobileView.setTranslationY(mobileViewY);
 
         switchViewsIfNeeded();
         scrollIfNeeded();
