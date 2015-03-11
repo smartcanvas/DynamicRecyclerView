@@ -17,7 +17,6 @@ package com.du.android.recyclerview;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
-import android.app.Activity;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
@@ -61,7 +60,6 @@ public abstract class DragDropTouchListener implements RecyclerView.OnItemTouchL
     private static final int MOVE_DURATION = 150;
 
     private RecyclerView recyclerView;
-    private Activity activity;
     private Drawable dragHighlight;
     private DisplayMetrics displayMetrics;
 
@@ -76,17 +74,16 @@ public abstract class DragDropTouchListener implements RecyclerView.OnItemTouchL
     private boolean enabled = true;
 
 
-    public DragDropTouchListener(RecyclerView recyclerView, Activity activity) {
+    public DragDropTouchListener(RecyclerView recyclerView) {
         this.recyclerView = recyclerView;
-        this.activity = activity;
         this.displayMetrics = recyclerView.getResources().getDisplayMetrics();
         this.scrollAmount = (int) (50 / displayMetrics.density);
         this.dragHighlight = recyclerView.getResources().getDrawable(R.drawable.drag_frame);
 
     }
 
-    public DragDropTouchListener(RecyclerView recyclerView, Activity activity, Drawable dragHighlight) {
-        this(recyclerView, activity);
+    public DragDropTouchListener(RecyclerView recyclerView, Drawable dragHighlight) {
+        this(recyclerView);
         this.dragHighlight = dragHighlight;
     }
 
@@ -142,14 +139,13 @@ public abstract class DragDropTouchListener implements RecyclerView.OnItemTouchL
 
         mobileViewCurrentPos = recyclerView.getChildPosition(viewUnder);
 
-        int[] viewRawCoords = getViewRawCoords(viewUnder);
         mobileView = copyViewAsImage(viewUnder);
-        mobileView.setX(viewRawCoords[0]);
-        mobileView.setY(viewRawCoords[1]);
-        mobileViewStartY = viewRawCoords[1];
+        mobileView.setX(viewUnder.getX());
+        mobileView.setY(viewUnder.getY());
+        mobileViewStartY = downY;
 
         ViewGroup.LayoutParams lp = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        activity.addContentView(mobileView, lp);
+        ((ViewGroup) recyclerView.getParent()).addView(mobileView, lp);
         mobileView.bringToFront();
         viewUnder.setVisibility(View.INVISIBLE);
 
@@ -235,7 +231,7 @@ public abstract class DragDropTouchListener implements RecyclerView.OnItemTouchL
         //Animate mobile view back to original position
         final View view = getViewByPosition(mobileViewCurrentPos);
         if (view != null && mobileView != null) {
-            float y = getViewRawCoords(view)[1];
+            float y = view.getY();
             mobileView.animate().y(y).setDuration(MOVE_DURATION).setListener(new AnimatorListenerAdapter() {
                 @Override
                 public void onAnimationEnd(Animator animation) {
@@ -309,17 +305,6 @@ public abstract class DragDropTouchListener implements RecyclerView.OnItemTouchL
         imageView.setImageBitmap(bitmap);
         return imageView;
     }
-
-
-    private int[] getViewRawCoords(View locateView) {
-        View globalView = activity.findViewById(android.R.id.content);
-        int topOffset = displayMetrics.heightPixels - globalView.getMeasuredHeight();
-        int[] loc = new int[2];
-        locateView.getLocationOnScreen(loc);
-        loc[1] = loc[1] - topOffset;
-        return loc;
-    }
-
 
     /**
      * Enable/disable drag/drop

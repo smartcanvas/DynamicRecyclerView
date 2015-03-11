@@ -165,13 +165,13 @@ public class DemoActivity extends Activity
         recyclerView.addOnItemTouchListener(swipeToDismissTouchListener);
 
 
-        dragDropTouchListener = new DragDropTouchListener(recyclerView, this) {
+        dragDropTouchListener = new DragDropTouchListener(recyclerView) {
             @Override
             protected void onItemSwitch(RecyclerView recyclerView, int from, int to) {
                 adapter.swapPositions(from, to);
                 adapter.clearSelection(from);
                 adapter.notifyItemChanged(to);
-                if(actionMode!=null) actionMode.finish();
+                if (actionMode != null) actionMode.finish();
             }
 
             @Override
