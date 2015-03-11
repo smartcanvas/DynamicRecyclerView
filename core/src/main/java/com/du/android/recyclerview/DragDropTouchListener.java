@@ -62,7 +62,6 @@ public abstract class DragDropTouchListener implements RecyclerView.OnItemTouchL
 
     private RecyclerView recyclerView;
     private Drawable dragHighlight;
-    private DisplayMetrics displayMetrics;
 
     private final int scrollAmount;
     private int downY = -1;
@@ -82,12 +81,12 @@ public abstract class DragDropTouchListener implements RecyclerView.OnItemTouchL
     /**
      * Simple gesture listener used to cached long touched in order to start the drag.
      */
-    private GestureDetector.SimpleOnGestureListener mSimpleOnGestureListener;
+    private GestureDetector.SimpleOnGestureListener simpleOnGestureListener;
 
     /**
      * Gesture detector used to process event.
      */
-    private GestureDetector mGestureDetector;
+    private GestureDetector gestureDetector;
 
     /**
      * Auto scrolling while dragging.
@@ -102,10 +101,12 @@ public abstract class DragDropTouchListener implements RecyclerView.OnItemTouchL
 
     public DragDropTouchListener(RecyclerView recyclerView) {
         this.recyclerView = recyclerView;
-        this.displayMetrics = recyclerView.getResources().getDisplayMetrics();
-        this.scrollAmount = (int) (50 / displayMetrics.density);
         this.dragHighlight = recyclerView.getResources().getDrawable(R.drawable.drag_frame);
+
         dragging = false;
+
+        DisplayMetrics displayMetrics = recyclerView.getResources().getDisplayMetrics();
+        this.scrollAmount = (int) (50 / displayMetrics.density);
 
         // init gesture listener used to catch long pressed event.
         initInternalGestureListener();
@@ -125,7 +126,7 @@ public abstract class DragDropTouchListener implements RecyclerView.OnItemTouchL
 
         // dragging not start, listen for long pressed
         if (!dragging) {
-            mGestureDetector.onTouchEvent(event);
+            gestureDetector.onTouchEvent(event);
         }
 
         switch (event.getAction() & MotionEvent.ACTION_MASK) {
@@ -359,7 +360,7 @@ public abstract class DragDropTouchListener implements RecyclerView.OnItemTouchL
      * start the drag event.
      */
     private void initInternalGestureListener() {
-        mSimpleOnGestureListener = new GestureDetector.SimpleOnGestureListener() {
+        simpleOnGestureListener = new GestureDetector.SimpleOnGestureListener() {
 
             @Override
             public void onLongPress(MotionEvent e) {
@@ -367,7 +368,7 @@ public abstract class DragDropTouchListener implements RecyclerView.OnItemTouchL
             }
 
         };
-        mGestureDetector = new GestureDetector(recyclerView.getContext(), mSimpleOnGestureListener);
+        gestureDetector = new GestureDetector(recyclerView.getContext(), simpleOnGestureListener);
     }
 
     /**
