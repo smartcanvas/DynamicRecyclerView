@@ -89,7 +89,15 @@ public abstract class DragDropTouchListener implements RecyclerView.OnItemTouchL
      */
     private GestureDetector mGestureDetector;
 
-    private float mInitialeY;
+    /**
+     * Auto scrolling while dragging.
+     */
+    private AutoScroller autoScroller;
+
+    /**
+     * Used to know if the auto scroller is already started.
+     */
+    private boolean isScrolling;
 
 
     public DragDropTouchListener(RecyclerView recyclerView) {
@@ -101,6 +109,9 @@ public abstract class DragDropTouchListener implements RecyclerView.OnItemTouchL
 
         // init gesture listener used to catch long pressed event.
         initInternalGestureListener();
+
+        // init auto scroller used to scroll while dragging.
+        autoScroller = new AutoScroller();
     }
 
     public DragDropTouchListener(RecyclerView recyclerView, Drawable dragHighlight) {
@@ -267,6 +278,7 @@ public abstract class DragDropTouchListener implements RecyclerView.OnItemTouchL
                         draggingThumbnail.recycle();
                         draggingThumbnail = null;
                         mobileView = null;
+                        recyclerView.removeCallbacks(autoScroller);
                     }
 
                 }
@@ -291,19 +303,24 @@ public abstract class DragDropTouchListener implements RecyclerView.OnItemTouchL
         int hoverViewTop = (int) mobileView.getY();
         int hoverHeight = mobileView.getHeight();
 
-        if (hoverViewTop <= 0) {
-            recyclerView.scrollBy(0, -scrollAmount);
-            return true;
-        }
 
-        if (hoverViewTop + hoverHeight >= height) {
-            recyclerView.scrollBy(0, scrollAmount);
+        if (hoverViewTop <= 0 && !isScrolling) {
+            isScrolling = true;
+            Log.d("LARGONNE", "start scrolling start");
+            autoScroller.startScrolling(AutoScroller.START);
             return true;
+        } else if (hoverViewTop + hoverHeight >= height && !isScrolling) {
+            isScrolling = true;
+            Log.d("LARGONNE", "start scrolling end");
+            autoScroller.startScrolling(AutoScroller.END);
+            return true;
+        } else if (hoverViewTop >= 0 && hoverViewTop + hoverHeight <= height && isScrolling) {
+            autoScroller.stopScrolling();
+            Log.d("LARGONNE", "stop scrolling");
+            isScrolling = false;
         }
-
         return false;
     }
-
 
     /**
      * Build view which will be used while user performing a drag event.
@@ -378,5 +395,46 @@ public abstract class DragDropTouchListener implements RecyclerView.OnItemTouchL
      * @param position     position of a drop within adapter
      */
     protected abstract void onItemDrop(RecyclerView recyclerView, int position);
+
+    /**
+     * Auto scroller used to scroll the recycler view while dragging.
+     */
+    private final class AutoScroller implements Runnable {
+
+        /**
+         * Scroll to the start of the recycle view.
+         */
+        static final int START = -1;
+
+        /**
+         * Scroll to the end of the recycle view.
+         */
+        static final int END = 1;
+
+        private int direction;
+
+        public AutoScroller() {
+
+        }
+
+        public void startScrolling(int direction) {
+            if (direction != START && direction != END) {
+                throw new IllegalArgumentException("Direction unknown");
+            }
+            this.direction = direction;
+            recyclerView.post(this);
+
+        }
+
+        public void stopScrolling() {
+            recyclerView.removeCallbacks(this);
+        }
+
+        @Override
+        public void run() {
+            recyclerView.scrollBy(0, direction * scrollAmount);
+            recyclerView.post(this);
+        }
+    }
 
 }
