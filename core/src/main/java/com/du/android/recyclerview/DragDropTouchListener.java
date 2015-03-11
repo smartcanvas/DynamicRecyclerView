@@ -189,12 +189,12 @@ public abstract class DragDropTouchListener implements RecyclerView.OnItemTouchL
 
         int mobileViewY = (int) mobileView.getY();
 
-        if (aboveView != null && aboveView.getTop() > -1 && mobileViewY < aboveView.getTop()) {
-            Log.d(LOG_TAG, String.format("Got aboveView with top = %s, for position = %s, %s", aboveView.getTop(), abovePos, aboveView));
+        if (aboveView != null && aboveView.getY() > -1 && mobileViewY < aboveView.getY()) {
+            Log.d(LOG_TAG, String.format("Got aboveView with y = %s, for position = %s, %s", aboveView.getY(), abovePos, aboveView));
             doSwitch(aboveView, pos, abovePos);
         }
-        if (belowView != null && belowView.getTop() > -1 && mobileViewY > belowView.getTop()) {
-            Log.d(LOG_TAG, String.format("Got belowView with top = %s, for position = %s, %s", belowView.getTop(), belowPos, belowView));
+        if (belowView != null && belowView.getY() > -1 && mobileViewY > belowView.getY()) {
+            Log.d(LOG_TAG, String.format("Got belowView with y = %s, for position = %s, %s", belowView.getY(), belowPos, belowView));
             doSwitch(belowView, pos, belowPos);
         }
 
