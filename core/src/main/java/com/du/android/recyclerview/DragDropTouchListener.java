@@ -73,6 +73,11 @@ public abstract class DragDropTouchListener implements RecyclerView.OnItemTouchL
     private boolean dragging;
     private boolean enabled = true;
 
+    /**
+     * Bitmap used to build the view displayed as dragging thumbnail.
+     */
+    private Bitmap draggingThumbnail;
+
 
     public DragDropTouchListener(RecyclerView recyclerView) {
         this.recyclerView = recyclerView;
@@ -139,7 +144,7 @@ public abstract class DragDropTouchListener implements RecyclerView.OnItemTouchL
 
         mobileViewCurrentPos = recyclerView.getChildPosition(viewUnder);
 
-        mobileView = copyViewAsImage(viewUnder);
+        mobileView = getDraggingView(viewUnder);
         mobileView.setX(viewUnder.getX());
         mobileView.setY(viewUnder.getY());
         mobileViewStartY = downY;
@@ -239,6 +244,8 @@ public abstract class DragDropTouchListener implements RecyclerView.OnItemTouchL
                     if (mobileView != null) {
                         ViewGroup parent = (ViewGroup) mobileView.getParent();
                         parent.removeView(mobileView);
+                        draggingThumbnail.recycle();
+                        draggingThumbnail = null;
                         mobileView = null;
                     }
 
@@ -278,8 +285,13 @@ public abstract class DragDropTouchListener implements RecyclerView.OnItemTouchL
     }
 
 
-    //Creates screenshot of a view
-    private ImageView copyViewAsImage(View v) {
+    /**
+     * Build view which will be used while user performing a drag event.
+     *
+     * @param v touched view after a long press.
+     * @return View which will be used as dragging thumbnail.
+     */
+    private View getDraggingView(View v) {
         //Clear ripple effect to not get into screenshot,
         // need something more clever here
         if (v instanceof FrameLayout) {
@@ -290,19 +302,18 @@ public abstract class DragDropTouchListener implements RecyclerView.OnItemTouchL
             if (v.getBackground() != null) v.getBackground().setVisible(false, false);
         }
 
-
-        Bitmap bitmap = Bitmap.createBitmap(v.getWidth(), v.getHeight(), Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(bitmap);
+        draggingThumbnail = Bitmap.createBitmap(v.getWidth(), v.getHeight(), Bitmap.Config.RGB_565);
+        Canvas canvas = new Canvas(draggingThumbnail);
         v.draw(canvas);
 
         //Drag highlight, usually border
         if (dragHighlight != null) {
-            dragHighlight.setBounds(0, 0, bitmap.getWidth(), bitmap.getHeight());
+            dragHighlight.setBounds(0, 0, draggingThumbnail.getWidth(), draggingThumbnail.getHeight());
             dragHighlight.draw(canvas);
         }
 
         ImageView imageView = new ImageView(recyclerView.getContext());
-        imageView.setImageBitmap(bitmap);
+        imageView.setImageBitmap(draggingThumbnail);
         return imageView;
     }
 
