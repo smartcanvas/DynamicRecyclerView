@@ -19,7 +19,6 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.ActionMode;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -29,7 +28,6 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.du.android.recyclerview.DragDropTouchListener;
-import com.du.android.recyclerview.ItemTouchListenerAdapter;
 import com.du.android.recyclerview.RecyclerViewAdapter;
 import com.du.android.recyclerview.SwipeToDismissTouchListener;
 
@@ -38,8 +36,7 @@ import java.util.Collections;
 import java.util.List;
 
 
-public class DemoActivity extends Activity
-        implements ItemTouchListenerAdapter.RecyclerViewOnItemClickListener, ActionMode.Callback {
+public class DemoActivity extends Activity implements ActionMode.Callback {
 
 
     private ActionMode actionMode;
@@ -142,9 +139,6 @@ public class DemoActivity extends Activity
         recyclerView.setAdapter(adapter);
 
 
-        recyclerView.addOnItemTouchListener(new ItemTouchListenerAdapter(recyclerView, this));
-
-
         swipeToDismissTouchListener = new SwipeToDismissTouchListener(recyclerView, new SwipeToDismissTouchListener.DismissCallbacks() {
 
             @Override
@@ -181,29 +175,6 @@ public class DemoActivity extends Activity
 
         recyclerView.addOnItemTouchListener(dragDropTouchListener);
     }
-
-    @Override
-    public void onItemClick(RecyclerView parent, View clickedView, int position) {
-        Log.d("", "onItemClick()");
-        if (this.actionMode != null) {
-            toggleSelection(position);
-        }
-    }
-
-
-    private void toggleSelection(int position) {
-        adapter.toggleSelection(position);
-        actionMode.setTitle("Selected " + adapter.getSelectedItemCount());
-    }
-
-    @Override
-    public void onItemLongClick(RecyclerView parent, View clickedView, int position) {
-        Log.d("", "onItemLongClick()");
-        startActionMode(this);
-        toggleSelection(position);
-        dragDropTouchListener.startDrag();
-    }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
