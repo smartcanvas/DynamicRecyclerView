@@ -81,6 +81,11 @@ public class RecycleDragDropManager implements RecyclerView.OnItemTouchListener 
     private boolean dragging;
     private boolean enabled = true;
 
+    @Override
+    public void onRequestDisallowInterceptTouchEvent(boolean allow) {
+
+    }
+
     /**
      * Bitmap used to build the view displayed as dragging thumbnail.
      */
